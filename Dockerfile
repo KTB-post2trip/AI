@@ -5,10 +5,23 @@ FROM python:3.9-slim
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
+    unzip \
+    chromium \
+    libnss3 \
+    libgdk-pixbuf2.0-0 \
+    libasound2 \
     && rm -rf /var/lib/apt/lists/*
 
+# chromium 버전 확인 (실제 버전은 확인 후 수정)
+RUN CHROMIUM_VERSION=$(chromium --version | awk '{print $2}') && \
+    echo "Detected Chromium version: $CHROMIUM_VERSION"
 
-# 작업 디렉토리 설정x
+# chromedriver 133.x 버전 다운로드 및 설치 (리눅스용)
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.141/linux64/chromedriver-linux64.zip -O /tmp/chromedriver.zip && \
+    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+    rm /tmp/chromedriver.zip
+
+# 작업 디렉토리 설정
 WORKDIR /app
 
 # 의존성 파일을 복사
