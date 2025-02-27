@@ -1,0 +1,56 @@
+name: Build, Deploy Docker Image to EC2
+
+on:
+  push:
+    branches:
+      - TC-18
+  pull_request:
+    branches:
+      - TC-18
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build Docker image
+        run: |
+          docker build -t flask-app .
+
+      - name: SSH into EC2 and deploy
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # Stop any existing containers (optional)
+            docker stop flask-app || true
+            docker rm flask-app || true
+
+            # Pull the latest image (or rebuild)
+            docker pull flask-app:latest
+
+            # Run the container on EC2
+            docker run -d -p 8000:8000 \
+            -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} flask-app
+
+      - name: Push Docker image to DockerHub (optional)
+        run: |
+          docker tag my-flask-app:latest ${{ secrets.DOCKERHUB_USERNAME }} /flask-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-app:latest
+
