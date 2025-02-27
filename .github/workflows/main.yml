@@ -1,4 +1,4 @@
-name: Build, Deploy Docker Image to EC2
+name: Build and Deploy Docker Image to EC2
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        
+
       - name: Build Docker image
         run: |
           docker build -t flask-app .
@@ -41,6 +41,11 @@ jobs:
           docker tag flask-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/flask-app:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-app:latest
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  
+
+    steps:
       - name: SSH into EC2 and deploy
         uses: appleboy/ssh-action@v0.1.7
         with:
