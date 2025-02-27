@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     libgdk-pixbuf2.0-0 \
     libasound2 \
     curl \
+    libxkbcommon0 \
+    libxrandr2 \
+    xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # chromium 설치 (deb 파일을 다운로드하여 설치)
