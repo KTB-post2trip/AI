@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
     unzip \
-    chromium \
+    chromium=114.0.5735.90-0 \
     libnss3 \
     libgdk-pixbuf2.0-0 \
     libasound2 \
