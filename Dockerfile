@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
     libxkbcommon0 \
     libxrandr2 \
     xdg-utils \
+    libpango-1.0-0 \
+    libvulkan1 \
+    libxdamage1 \
     && rm -rf /var/lib/apt/lists/*
 
 # chromium 설치 (deb 파일을 다운로드하여 설치)
