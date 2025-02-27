@@ -1,11 +1,11 @@
-# 셀레니움 공식 이미지를 사용
+# 셀레니움 공식 이미지를 사용 (chromium과 chromedriver가 이미 설치됨)
 FROM selenium/standalone-chrome:latest
 
-# Python 3.9 베이스 이미지로 변경
-FROM python:3.9-slim
-
-# 필요한 의존성 설치
+# 필요한 시스템 의존성 설치 (Python 3.9 포함)
+USER root
 RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
     wget \
     ca-certificates \
     unzip \
@@ -21,12 +21,12 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 의존성 설치
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # 코드 파일을 복사
 COPY . .
 
-# 환경 변수 로딩
+# 환경 변수 로딩 (필요시)
 RUN echo "GEMINI_API_KEY=${GEMINI_API_KEY}" >> .env
 
 # FastAPI 서버 실행
