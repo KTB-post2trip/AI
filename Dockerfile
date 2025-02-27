@@ -6,29 +6,18 @@ RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
     unzip \
+    chromium \
     libnss3 \
     libgdk-pixbuf2.0-0 \
     libasound2 \
     curl \
-    libxkbcommon0 \
-    libxrandr2 \
-    xdg-utils \
-    libpango-1.0-0 \
-    libvulkan1 \
-    libxdamage1 \
     && rm -rf /var/lib/apt/lists/*
 
-# chromium 설치 (deb 파일을 다운로드하여 설치)
-RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb && \
-    dpkg -i google-chrome.deb && \
-    apt-get -y --fix-broken install && \
-    rm google-chrome.deb
-
-# chromedriver 수동 다운로드 및 설치
-RUN wget https://chromedriver.storage.googleapis.com/112.0.5615.49/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && \
-    mv chromedriver /usr/local/bin/ && \
-    rm chromedriver_linux64.zip
+# ChromeDriver 설치
+RUN CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
+    wget https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -O /tmp/chromedriver.zip && \
+    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+    rm /tmp/chromedriver.zip
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -46,8 +35,9 @@ COPY . .
 RUN echo "GEMINI_API_KEY=${GEMINI_API_KEY}" >> .env
 
 # Chrome 브라우저와 chromedriver의 경로를 환경 변수로 설정
-ENV CHROME_BIN=/usr/bin/google-chrome
+ENV CHROME_BIN=/usr/bin/chromium
 ENV DISPLAY=:99
+ENV CHROMEDRIVER_PATH=/usr/local/bin/chromedriver
 
 # FastAPI 서버 실행
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
