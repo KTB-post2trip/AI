@@ -4,21 +4,11 @@ FROM python:3.9-slim
 # 필요한 시스템 의존성 설치
 RUN apt-get update && apt-get install -y \
     wget \
-    ca-certificates \
-    unzip \
-    chromium \
-    libnss3 \
-    libgdk-pixbuf2.0-0 \
-    libasound2 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# chromedriver 133.x 버전 다운로드 및 설치
-RUN wget https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.141/linux64/chromedriver-linux64.zip -O /tmp/chromedriver.zip && \
-    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
-    rm /tmp/chromedriver.zip
 
-# 작업 디렉토리 설정
+# 작업 디렉토리 설정x
 WORKDIR /app
 
 # 의존성 파일을 복사
