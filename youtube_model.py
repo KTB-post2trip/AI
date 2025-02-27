@@ -2,15 +2,20 @@ import os
 import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
 from dotenv import load_dotenv
+import openai 
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key = OPENAI_API_KEY)
+
+
+# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# genai.configure(api_key=GEMINI_API_KEY)
 
 class YouTubeModel:
     def __init__(self):
-        self.model = genai.GenerativeModel("gemini-1.5-pro")
+        self.model = "gpt-4-turbo" # genai.GenerativeModel("gemini-1.5-pro")
 
     # URL에서 비디오 ID 추출
     def get_video_id(self, url):
@@ -28,7 +33,7 @@ class YouTubeModel:
             return text
         except Exception as e:
             return f"자막을 가져오는 데 실패했습니다: {e}"
-
+    '''
     # Gemini 사용하여 텍스트 요약
     def summarize_text_with_gemini(self, text):
 
@@ -43,9 +48,35 @@ class YouTubeModel:
             f"요약 맨 앞에 카테고리는 !, 상호명은 @, 특징은 $ 으로 시작해줘. "
             f"주소 데이터가 같이 있는 경우에 주소 데이터는 제외하고 알려줘. :\n\n{text}"
         )
-    
+        
         return response.text
-    
+    '''
+    def summarize_text_with_openai(self, text):
+        prompt = (
+            "다음 유튜브 영상의 내용과 영상 설명을 여행 장소 중심으로 요약해줘. "
+            "카테고리는 '카페/디저트', '음식점', '관광지', '활동/체험', '쇼핑', '기타' 이 6가지로 분류해서 알려줘. "
+            "없는 카테고리는 제외하고 말해줘. "
+            "떡집의 경우에는 카페/디저트 카테고리로 넣어줘. "
+            "관광지나 상호명이 올바르게 나왔으면 좋겠어. "
+            "장소마다 특징을 한 줄로 정리해서 같이 설명해줘. "
+            "상호명이 없는 장소는 제외하고 알려줘. "
+            "요약 맨 앞에 카테고리는 !, 상호명은 @, 특징은 $ 으로 시작해줘. "
+            "주소 데이터가 같이 있는 경우에 주소 데이터는 제외하고 알려줘. "
+            f"\n\n{text}"
+        )
+
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "당신은 여행 가이드 AI입니다."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        return response.choices[0].message.content
+
+
+
     def process_youtube_summary(self, url):
         # 비디오 ID 추출 및 자막 가져오기
         video_id = self.get_video_id(url)
@@ -56,6 +87,6 @@ class YouTubeModel:
         if "자막을 가져오는 데 실패했습니다" in transcript_text:
             return {"error": transcript_text}
 
-        summary = self.summarize_text_with_gemini(transcript_text)
+        summary = self.summarize_text_with_openai(transcript_text)
         return {"summary": summary}
 

@@ -33,7 +33,7 @@ def process_youtube_url(youtube_url: str):
         transcript_text = yt_model.get_youtube_transcript(video_id)
 
         if "자막을 가져오는 데 실패했습니다" in transcript_text:
-            trinscript_text = ""
+            transcript_text = ""
 
         # 크롤링 데이터 + 자막 원문을 합쳐서 LLM에게 전달
         combined_text = f"""
@@ -54,7 +54,8 @@ def process_youtube_url(youtube_url: str):
         """
 
         # 기존 요약 함수 그대로 사용
-        final_summary = yt_model.summarize_text_with_gemini(combined_text)
+        # final_summary = yt_model.summarize_text_with_gemini(combined_text)
+        final_summary = yt_model.summarize_text_with_openai(combined_text)
 
         # 최종 요약 출력
         #print("\n📌 유튜브 영상 최종 요약 📌\n")
@@ -90,7 +91,8 @@ def process_youtube_url(youtube_url: str):
 
         # JSON으로 변환 (한글 깨짐 방지)
         json_data = json.dumps(records, ensure_ascii=False)
-        return json_data
+        
+        return json.loads(json_data)
         # print(json_data)
 
 

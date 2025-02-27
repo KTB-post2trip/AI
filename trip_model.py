@@ -4,15 +4,20 @@ import google.generativeai as genai
 from math import radians, sin, cos, sqrt, atan2
 from itertools import permutations
 from dotenv import load_dotenv
+import openai
 
 load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# openai.api_key = OPENAI_API_KEY
+client = openai.OpenAI(api_key = OPENAI_API_KEY)
 
 class TripModel:
     def __init__(self):
         # Gemini API 설정
-        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        genai.configure(api_key=GEMINI_API_KEY)
-        self.model = genai.GenerativeModel("gemini-1.5-pro")
+        # GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        # genai.configure(api_key=GEMINI_API_KEY)
+        self.model = "gpt-4-turbo" # genai.GenerativeModel("gemini-1.5-pro")
 
     # Haversine 공식: 두 위도/경도 좌표 간 거리 계산 (단위: km)
     def haversine(self, lat1, lon1, lat2, lon2):
@@ -77,10 +82,32 @@ class TripModel:
         {places}
         """
 
-        response = self.model.generate_content(prompt)
+        # response = self.model.generate_content(prompt)
         
         # LLM 응답에서 불필요한 부분 제거 후 반환
-        return response.text.strip()
+        # return response.text.strip()
+        '''
+        response = openai.ChatCompletion.create(
+            model=self.model,  # "gpt-4-turbo"
+            messages=[
+                {"role": "system", "content": "당신은 여행 가이드 AI입니다."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        return response["choices"][0]["message"]["content"]
+        '''
+
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "당신은 여행 가이드 AI입니다."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        return response.choices[0].message.content
+
 
 
     # LLM 응답 데이터에서 헤더 제거 및 데이터 정리
