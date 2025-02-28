@@ -90,7 +90,8 @@ def process_youtube_url(youtube_url: str):
 
         # JSON으로 변환 (한글 깨짐 방지)
         json_data = json.dumps(records, ensure_ascii=False)
-        return json_data
+        json_dict = json.loads(json_data)
+        return json_dict
         # print(json_data)
 
 
@@ -102,7 +103,6 @@ async def process_url(url: str):#payload: URLRequest
     # records = process_youtube_url(payload.url)
     # return records
     records = process_youtube_url(url)
-    print(records)
     return records
 
 
@@ -177,8 +177,11 @@ async def recommend_post(body: dict):
     parsed_schedule = trip_model.parse_llm_schedule(initial_schedule)
     optimized_schedule = trip_model.optimize_schedule_with_distance(parsed_schedule, places_objects)
     final_data = trip_model.convert_to_join(optimized_schedule)
-    print(final_data)
-    return json.loads(final_data)
+    
+    result = json.loads(final_data)
+    print(type(result))
+
+    return result
 
 @app.get("/")
 async def root():
